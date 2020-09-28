@@ -147,7 +147,7 @@ impl Parser<'_> {
             } else if next_token == ")" {
                 if let Err(e) = self.consume(&next_token) {
                     return Err(e);
-                };
+                }
 
                 if items.is_empty() {
                     return Err(ParserError::EmptyGroup {
@@ -196,7 +196,8 @@ impl Parser<'_> {
             } else if next_token == "e" {
                 if let Err(e) = self.consume(&next_token) {
                     return Err(e);
-                };
+                }
+
                 is_electron = true;
             } else if regular_expression_for_element.is_match(&next_token) {
                 let element = match self.parse_element() {
@@ -217,7 +218,8 @@ impl Parser<'_> {
                 if x == "{" {
                     if let Err(e) = self.consume(&x) {
                         return Err(e);
-                    };
+                    }
+
                     match self.get_next_token() {
                         Ok(x) => match x {
                             Some(_) => {},
@@ -305,7 +307,7 @@ impl Parser<'_> {
     }
 
     /// Parses an equation.
-    pub fn parse(&mut self) -> Result<Equation, ParserError> {
+    pub fn parse_equation(&mut self) -> Result<Equation, ParserError> {
         self.skip_spaces();
 
         let mut reactants = vec![];
@@ -322,7 +324,8 @@ impl Parser<'_> {
                         "+" => {
                             if let Err(e) = self.consume(&x) {
                                 return Err(e);
-                            };
+                            }
+
                             let entity = match self.parse_entity() {
                                 Ok(x) => x,
                                 Err(e) => return Err(e),
@@ -332,7 +335,8 @@ impl Parser<'_> {
                         "=" => {
                             if let Err(e) = self.consume(&x) {
                                 return Err(e);
-                            };
+                            }
+
                             break;
                         },
                         _ => return Err(ParserError::PlusOrEqualSignExpected {
@@ -358,7 +362,8 @@ impl Parser<'_> {
                         "+" => {
                             if let Err(e) = self.consume(&x) {
                                 return Err(e)
-                            };
+                            }
+
                             let entity = match self.parse_entity() {
                                 Ok(x) => x,
                                 Err(e) => return Err(e),
@@ -460,8 +465,11 @@ mod tests {
     }
 
     #[test]
-    fn test_parse() {
+    fn test_parse_equation() {
         let mut parser = Parser::new("H2 + O2 = H2O");
-        assert_eq!(parser.parse().unwrap().format(&[2, 1, 2]), "2\u{a0}H2 + O2 = 2\u{a0}H2O");
+        assert_eq!(
+            parser.parse_equation().unwrap().format(&[2, 1, 2]),
+            "2\u{a0}H2 + O2 = 2\u{a0}H2O"
+        );
     }
 }

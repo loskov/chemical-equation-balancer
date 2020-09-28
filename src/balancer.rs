@@ -18,7 +18,7 @@ pub struct Balancer {
 impl Balancer {
     /// Balancer constructor.
     pub fn new(equation: &str) -> Result<Balancer, ParserError> {
-        let equation = match Parser::new(equation).parse() {
+        let equation = match Parser::new(equation).parse_equation() {
             Ok(x) => x,
             Err(e) => return Err(e),
         };
