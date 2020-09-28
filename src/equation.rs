@@ -60,7 +60,10 @@ impl Equation {
         [
             &self.format_entities(coefficients, &self.reactants),
             " = ",
-            &self.format_entities(coefficients, &self.products),
+            &self.format_entities(
+                &coefficients[self.reactants.len()..coefficients.len()],
+                &self.products
+            ),
         ].join("")
     }
 }

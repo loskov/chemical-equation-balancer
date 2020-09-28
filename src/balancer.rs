@@ -195,7 +195,7 @@ mod tests {
             ["H2 + O2 = H2O", "2\u{a0}H2 + O2 = 2\u{a0}H2O"],
             [
                 "Fe + H2SO4 = Fe2(SO4)3 + SO2 + H2O",
-                "2\u{a0}Fe + 6\u{a0}H2SO4 = 2\u{a0}Fe2(SO4)3 + 6\u{a0}SO2 + H2O",
+                "2\u{a0}Fe + 6\u{a0}H2SO4 = Fe2(SO4)3 + 3\u{a0}SO2 + 6\u{a0}H2O",
             ],
             [
                 "H2O + Pb(CH3COO)2 = CH3COOH + Pb(OH)2",
@@ -203,11 +203,11 @@ mod tests {
             ],
             [
                 "NaOH + Cl2 + Br2 = NaBrO3 + NaCl + H2O",
-                "12\u{a0}NaOH + 5\u{a0}Cl2 + Br2 = 12\u{a0}NaBrO3 + 5\u{a0}NaCl + H2O",
+                "12\u{a0}NaOH + 5\u{a0}Cl2 + Br2 = 2\u{a0}NaBrO3 + 10\u{a0}NaCl + 6\u{a0}H2O",
             ],
             [
                 "C6H12O6 + KMnO4 + H2SO4 = CO2 + K2SO4 + MnSO4 + H2O",
-                "5\u{a0}C6H12O6 + 24\u{a0}KMnO4 + 36\u{a0}H2SO4 = 5\u{a0}CO2 + 24\u{a0}K2SO4 + 36\u{a0}MnSO4 + 30\u{a0}H2O",
+                "5\u{a0}C6H12O6 + 24\u{a0}KMnO4 + 36\u{a0}H2SO4 = 30\u{a0}CO2 + 12\u{a0}K2SO4 + 24\u{a0}MnSO4 + 66\u{a0}H2O",
             ],
         ];
 
@@ -218,11 +218,11 @@ mod tests {
         let ionic_equations = [
             ["Fe{3+} + e = Fe", "Fe{3+} + 3\u{a0}e− = Fe"],
             ["Cl{5+} + e = Cl{-}", "Cl{5+} + 6\u{a0}e− = Cl"],
-            ["CO3{2-} + H{+} = H2O + CO2", "CO3{2−} + 2\u{a0}H = H2O + 2\u{a0}CO2"],
-            ["CaCO3 + H{+} = Ca{2+} + CO2 + H2O", "CaCO3 + 2\u{a0}H = Ca{2+} + 2\u{a0}CO2 + H2O"],
+            ["CO3{2-} + H{+} = H2O + CO2", "CO3{2−} + 2\u{a0}H = H2O + CO2"],
+            ["CaCO3 + H{+} = Ca{2+} + CO2 + H2O", "CaCO3 + 2\u{a0}H = Ca{2+} + CO2 + H2O"],
             [
                 "Cr2O7{2-} + H{+} + e = Cr{3+} + H2O",
-                "Cr2O7{2−} + 14\u{a0}H + 6\u{a0}e− = Cr{3+} + 14\u{a0}H2O",
+                "Cr2O7{2−} + 14\u{a0}H + 6\u{a0}e− = 2\u{a0}Cr{3+} + 7\u{a0}H2O",
             ],
         ];
 
