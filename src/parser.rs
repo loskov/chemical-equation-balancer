@@ -145,7 +145,7 @@ impl Parser<'_> {
                 };
                 items.push(Box::new(element));
             } else if next_token == ")" {
-                if let Err(e) = self.consume(")") {
+                if let Err(e) = self.consume(&next_token) {
                     return Err(e);
                 };
 
@@ -206,7 +206,7 @@ impl Parser<'_> {
         match self.get_next_token() {
             Ok(x) => if let Some(x) = x {
                 if x == "{" {
-                    if let Err(e) = self.consume("{") {
+                    if let Err(e) = self.consume(&x) {
                         return Err(e);
                     };
                     match self.get_next_token() {
@@ -241,7 +241,7 @@ impl Parser<'_> {
                     match self.get_next_token() {
                         Ok(x) => if let Some(x) = x {
                             if x == "}" {
-                                match self.consume("}") {
+                                match self.consume(&x) {
                                     Ok(_) => {},
                                     Err(e) => return Err(e),
                                 };
@@ -301,7 +301,7 @@ impl Parser<'_> {
                 Ok(x) => if let Some(x) = x {
                     match x.as_str() {
                         "+" => {
-                            if let Err(e) = self.consume("+") {
+                            if let Err(e) = self.consume(&x) {
                                 return Err(e);
                             };
                             let entity = match self.parse_entity() {
@@ -311,7 +311,7 @@ impl Parser<'_> {
                             reactants.push(entity);
                         },
                         "=" => {
-                            if let Err(e) = self.consume("=") {
+                            if let Err(e) = self.consume(&x) {
                                 return Err(e);
                             };
                             break;
@@ -337,7 +337,7 @@ impl Parser<'_> {
                 Ok(x) => match x {
                     Some(x) => match x.as_str() {
                         "+" => {
-                            if let Err(e) = self.consume("+") {
+                            if let Err(e) = self.consume(&x) {
                                 return Err(e)
                             };
                             let entity = match self.parse_entity() {
