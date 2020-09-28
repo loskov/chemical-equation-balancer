@@ -174,7 +174,9 @@ impl Parser<'_> {
     fn parse_entity(&mut self) -> Result<Entity, ParserError> {
         let start_position = self.position;
         let mut items: Vec<Box<dyn Item>> = vec![];
-        let regular_expression = RegularExpression::new(RegularExpression::Element);
+        let mut is_electron = false;
+        let regular_expression_for_element = RegularExpression::new(RegularExpression::Element);
+        let regular_expression_for_digits = RegularExpression::new(RegularExpression::Digits);
 
         loop {
             let next_token = match self.get_next_token() {
@@ -191,18 +193,25 @@ impl Parser<'_> {
                     Err(e) => return Err(e),
                 };
                 items.push(Box::new(group));
-            } else if regular_expression.is_match(&next_token) {
+            } else if next_token == "e" {
+                if let Err(e) = self.consume(&next_token) {
+                    return Err(e);
+                };
+                is_electron = true;
+            } else if regular_expression_for_element.is_match(&next_token) {
                 let element = match self.parse_element() {
                     Ok(x) => x,
                     Err(e) => return Err(e),
                 };
                 items.push(Box::new(element));
+            } else if regular_expression_for_digits.is_match(&next_token) {
+                return Err(ParserError::NumberNotExpected { start_index: self.position });
             } else {
                 break;
             }
         }
 
-        let mut charge = 0i8;
+        let mut charge: Option<i8> = None;
         match self.get_next_token() {
             Ok(x) => if let Some(x) = x {
                 if x == "{" {
@@ -219,13 +228,13 @@ impl Parser<'_> {
                         Err(e) => return Err(e),
                     }
                     charge = match self.parse_optional_number() {
-                        Ok(x) => x as i8,
+                        Ok(x) => Some(x as i8),
                         Err(e) => return Err(e),
                     };
                     match self.get_next_token() {
                         Ok(x) => if let Some(x) = x {
                             if x == "-" {
-                                charge *= -1; // charge = -charge
+                                charge = Some(-charge.unwrap());
                             } else if x != "+" {
                                 return Err(ParserError::ChargeSignExpected {
                                     start_index: self.position,
@@ -263,26 +272,36 @@ impl Parser<'_> {
             x.add_to_elements_names(&mut elements_names);
         }
 
-        if items.is_empty() {
-            return Err(ParserError::EntityExpected {
-                start_index: start_position, end_index: self.position,
-            });
-        } else if elements_names.contains("e") {
-            if items.len() > 1 {
+        if is_electron {
+            if items.len() > 0 {
                 return Err(ParserError::ElectronNeedsToStandAlone {
-                    start_index: start_position, end_index: self.position,
-                });
-            } else if charge != 0 && charge != -1 {
-                return Err(ParserError::InvalidChargeForElectron {
                     start_index: start_position, end_index: self.position,
                 });
             }
 
-            items.clear();
-            charge = -1;
+            if charge.is_none() {
+                charge = Some(-1);
+            }
+
+            if charge != Some(-1) {
+                return Err(ParserError::InvalidChargeForElectron {
+                    start_index: start_position, end_index: self.position,
+                });
+            }
+        } else {
+            if items.is_empty() {
+                return Err(ParserError::EntityExpected {
+                    start_index: start_position,
+                    end_index: self.position,
+                });
+            }
+
+            if charge.is_none() {
+                charge = Some(0);
+            }
         }
 
-        Ok(Entity::new(items, charge))
+        Ok(Entity::new(items, charge.unwrap()))
     }
 
     /// Parses an equation.

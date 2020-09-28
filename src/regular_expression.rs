@@ -16,9 +16,9 @@ impl RegularExpression {
     fn get_pattern(&self) -> &str {
         match &self {
             RegularExpression::Digits => r"^\d+",
-            RegularExpression::Element => r"^(?:[A-Z][a-z]*|e)",
+            RegularExpression::Element => r"^[A-Z][a-z]*",
             RegularExpression::Spaces => r"^\s+",
-            RegularExpression::Token => r"^([A-Z][a-z]*|\d+|[e+-={}()])",
+            RegularExpression::Token => r"^([A-Z][a-z]*|\d+|[e+-=(){}])",
         }
     }
 }
