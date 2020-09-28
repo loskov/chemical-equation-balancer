@@ -275,7 +275,7 @@ impl Parser<'_> {
         }
 
         if is_electron {
-            if items.len() > 0 {
+            if !items.is_empty() {
                 return Err(ParserError::ElectronNeedsToStandAlone {
                     start_index: start_position, end_index: self.position,
                 });
