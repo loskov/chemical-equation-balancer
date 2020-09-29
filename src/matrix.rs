@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use num::integer::gcd;
 
 pub struct Matrix {
@@ -34,15 +33,13 @@ impl Matrix {
 
     /// Simplifies a row.
     pub fn simplify_row(row: &[i32]) -> Vec<i32> {
-        let mut sign = 0i32;
+        let mut sign = 0;
 
         for integer in row {
-            if integer == &0 {
-                continue;
+            if *integer != 0 {
+                sign = integer.signum();
+                break;
             }
-
-            sign = integer.signum();
-            break;
         }
 
         if sign == 0 {
@@ -110,27 +107,27 @@ impl Matrix {
             }
         }
     }
-
-    /// Formats a matrix.
-    #[allow(dead_code)]
-    pub fn format(&self) -> String {
-        let mut result = "[".to_string();
-
-        for i in 0..self.rows_count {
-            if i != 0 {
-                result += ",\n";
-            }
-
-            result += &["[", self.cells[i].iter().join(", ").as_str(), "]"].join("");
-        }
-
-        result + "]"
-    }
 }
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use crate::matrix::Matrix;
+
+    /// Formats a matrix.
+    pub fn format_matrix(matrix: &Matrix) -> String {
+        let mut result = "[".to_string();
+
+        for i in 0..matrix.rows_count {
+            if i != 0 {
+                result += ",\n";
+            }
+
+            result += &["[", matrix.cells[i].iter().join(", ").as_str(), "]"].join("");
+        }
+
+        result + "]"
+    }
 
     #[test]
     fn test_new() {
@@ -157,12 +154,17 @@ mod tests {
 
     #[test]
     fn test_eliminate() {
-        // TODO
-    }
-
-    #[test]
-    fn format() {
-        assert_eq!(Matrix::new(1, 2).format(), "[[0, 0]]");
-        assert_eq!(Matrix::new(2, 3).format(), "[[0, 0, 0],\n[0, 0, 0]]");
+        let mut matrix = Matrix::new(4, 4);
+        matrix.cells = vec![
+            vec![2, 0, -2, 0],
+            vec![0, 2, -1, 0],
+            vec![0, 0, 0, 0],
+            vec![0, 0, 0, 0],
+        ];
+        matrix.eliminate();
+        assert_eq!(
+            format_matrix(&matrix),
+            "[[1, 0, -1, 0],\n[0, 2, -1, 0],\n[0, 0, 0, 0],\n[0, 0, 0, 0]]"
+        );
     }
 }
