@@ -10,11 +10,15 @@ mod parser;
 mod parser_error;
 mod regular_expression;
 
+use std::env;
 use crate::balancer::Balancer;
 
 fn main() {
-    let equation = "H2 + O2 = H2O";
-    let mut balancer = match Balancer::new(equation) {
+    let equation = match env::args().nth(1) {
+        Some(x) => x,
+        None => panic!("Нет уравнения."),
+    };
+    let mut balancer = match Balancer::new(&equation) {
         Ok(x) => x,
         Err(e) => panic!(e.get_description()),
     };
