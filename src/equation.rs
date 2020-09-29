@@ -14,7 +14,7 @@ impl Equation {
         Equation { reactants, products }
     }
 
-    /// Returns the elements names.
+    /// Returns the names of elements.
     pub fn get_elements_names(&self) -> Vec<String> {
         let mut elements_names = HashSet::new();
 
