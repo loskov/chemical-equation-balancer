@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::collections::HashSet;
 use crate::{
     element::Element,
@@ -31,7 +32,9 @@ impl Parser<'_> {
             return Ok(None);
         }
 
-        match RegularExpression::new(RegularExpression::Token).captures(self.get_substring()) {
+        let regular_expression = Regex::new(RegularExpression::Token.get_pattern()).unwrap();
+
+        match regular_expression.captures(self.get_substring()) {
             Some(x) => Ok(Some(x[0].to_string())),
             None => Err(ParserError::InvalidSymbol { start_index: self.position }),
         }
@@ -61,7 +64,8 @@ impl Parser<'_> {
 
     /// Skips the spaces.
     fn skip_spaces(&mut self) {
-        let regular_expression = RegularExpression::new(RegularExpression::Spaces);
+        let regular_expression = Regex::new(RegularExpression::Spaces.get_pattern()).unwrap();
+
         if let Some(x) = regular_expression.captures(self.get_substring()) {
             self.position += x[0].chars().count();
         }
@@ -72,7 +76,9 @@ impl Parser<'_> {
         match self.get_next_token() {
             Ok(x) => match x {
                 Some(x) => {
-                    let regular_expression = RegularExpression::new(RegularExpression::Digits);
+                    let regular_expression = Regex::new(
+                        RegularExpression::Digits.get_pattern()
+                    ).unwrap();
 
                     if regular_expression.is_match(x.as_str()) {
                         match self.take_token() {
@@ -99,7 +105,7 @@ impl Parser<'_> {
             Err(x) => return Err(x),
         };
 
-        if RegularExpression::new(RegularExpression::Element).is_match(&token) {
+        if Regex::new(RegularExpression::Symbol.get_pattern()).unwrap().is_match(&token) {
             let optional_number = match self.parse_optional_number() {
                 Ok(x) => x,
                 Err(e) => return Err(e),
@@ -119,7 +125,7 @@ impl Parser<'_> {
             return Err(e);
         }
 
-        let regular_expression = RegularExpression::new(RegularExpression::Element);
+        let regular_expression = Regex::new(RegularExpression::Symbol.get_pattern()).unwrap();
 
         loop {
             let next_token = match self.get_next_token() {
@@ -175,8 +181,12 @@ impl Parser<'_> {
         let start_position = self.position;
         let mut items: Vec<Box<dyn Item>> = vec![];
         let mut is_electron = false;
-        let regular_expression_for_element = RegularExpression::new(RegularExpression::Element);
-        let regular_expression_for_digits = RegularExpression::new(RegularExpression::Digits);
+        let regular_expression_for_symbol = Regex::new(
+            RegularExpression::Symbol.get_pattern()
+        ).unwrap();
+        let regular_expression_for_digits = Regex::new(
+            RegularExpression::Digits.get_pattern()
+        ).unwrap();
 
         loop {
             let next_token = match self.get_next_token() {
@@ -199,7 +209,7 @@ impl Parser<'_> {
                 }
 
                 is_electron = true;
-            } else if regular_expression_for_element.is_match(&next_token) {
+            } else if regular_expression_for_symbol.is_match(&next_token) {
                 let element = match self.parse_element() {
                     Ok(x) => x,
                     Err(e) => return Err(e),
