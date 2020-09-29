@@ -1,5 +1,4 @@
 use regex::Regex;
-use std::collections::HashSet;
 use crate::{
     element::Element,
     entity::Entity,
@@ -223,6 +222,7 @@ impl Parser<'_> {
         }
 
         let mut charge: Option<i8> = None;
+
         match self.get_next_token() {
             Ok(x) => if let Some(x) = x {
                 if x == "{" {
@@ -239,10 +239,12 @@ impl Parser<'_> {
                         },
                         Err(e) => return Err(e),
                     }
+
                     charge = match self.parse_optional_number() {
                         Ok(x) => Some(x as i8),
                         Err(e) => return Err(e),
                     };
+
                     match self.get_next_token() {
                         Ok(x) => if let Some(x) = x {
                             if x == "-" {
@@ -254,11 +256,13 @@ impl Parser<'_> {
                             }
                         },
                         Err(e) => return Err(e),
-                    };
+                    }
+
                     match self.take_token() {
                         Ok(_) => {},
                         Err(e) => return Err(e),
-                    };
+                    }
+
                     match self.get_next_token() {
                         Ok(x) => if let Some(x) = x {
                             if x == "}" {
@@ -273,15 +277,10 @@ impl Parser<'_> {
                             }
                         },
                         Err(e) => return Err(e),
-                    };
+                    }
                 }
             },
             Err(e) => return Err(e),
-        };
-        let mut elements_names = HashSet::new();
-
-        for x in &items {
-            x.add_to_elements_names(&mut elements_names);
         }
 
         if is_electron {
@@ -319,7 +318,6 @@ impl Parser<'_> {
     /// Parses an equation.
     pub fn parse_equation(&mut self) -> Result<Equation, ParserError> {
         self.skip_spaces();
-
         let mut reactants = vec![];
         let entity = match self.parse_entity() {
             Ok(x) => x,
