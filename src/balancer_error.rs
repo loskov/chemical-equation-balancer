@@ -12,9 +12,9 @@ impl BalancerError {
             BalancerError::AllZeroSolution => "Все коэффициенты равны нулю.",
             BalancerError::IncorrectBalance => "Неверно расставлены коэффициенты.",
             BalancerError::MismatchNumberOfCoefficients =>
-                "Несоответствие количества коэффициентов",
+                "Несоответствие количества коэффициентов.",
             BalancerError::MultipleIndependentSolutions =>
-                "Реакцию можно уравнять бесконечным числом способов",
+                "Реакцию можно уравнять бесконечным числом способов.",
         }
     }
 }
