@@ -353,6 +353,10 @@ impl Parser<'_> {
                             start_index: self.position,
                         }),
                     }
+                } else {
+                    return Err(ParserError::PlusOrEqualSignExpected {
+                        start_index: self.position,
+                    });
                 },
                 Err(e) => return Err(e),
             };
