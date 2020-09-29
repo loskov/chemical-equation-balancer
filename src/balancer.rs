@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fill_matrix() {
+    fn test_get_initial_matrix() {
         // TODO
     }
 
