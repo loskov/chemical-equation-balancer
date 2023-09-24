@@ -10,8 +10,8 @@ pub struct Group {
 
 impl Group {
     /// Group constructor.
-    pub fn new(items: Vec<Box<dyn Item>>, count: u8) -> Group {
-        Group { items, count }
+    pub fn new(items: Vec<Box<dyn Item>>, count: u8) -> Self {
+        Self { items, count }
     }
 }
 
@@ -23,7 +23,7 @@ impl Item for Group {
     }
 
     fn count_element_by_name(&self, element_name: &str) -> u32 {
-        self.count as u32
+        u32::from(self.count)
             * self.items.iter().fold(0, |sum, x| sum + x.count_element_by_name(element_name))
     }
 

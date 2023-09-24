@@ -17,13 +17,11 @@ pub struct Balancer {
 
 impl Balancer {
     /// Balancer constructor.
-    pub fn new(equation: &str) -> Result<Balancer, ParserError> {
-        let equation = match Parser::new(equation).parse_equation() {
-            Ok(x) => x,
-            Err(e) => return Err(e),
-        };
-        let matrix = Balancer::get_initial_matrix(&equation);
-        Ok(Balancer { equation, matrix })
+    pub fn new(equation: &str) -> Result<Self, ParserError> {
+        let equation = Parser::new(equation).parse_equation()?;
+        let matrix = Self::get_initial_matrix(&equation);
+
+        Ok(Self { equation, matrix })
     }
 
     /// Returns an initial matrix.
@@ -51,6 +49,7 @@ impl Balancer {
     /// Solves a matrix.
     fn solve_matrix(&mut self) -> Result<(), BalancerError> {
         self.matrix.eliminate();
+
         let mut row_index = 0;
 
         for i in 0..self.matrix.rows_count {
@@ -58,7 +57,7 @@ impl Balancer {
                 break;
             }
 
-            row_index += 1
+            row_index += 1;
         }
 
         if row_index == self.matrix.rows_count - 1 {
@@ -67,7 +66,9 @@ impl Balancer {
 
         self.matrix.cells[self.matrix.rows_count - 1][row_index] = 1;
         self.matrix.cells[self.matrix.rows_count - 1][self.matrix.columns_count - 1] = 1;
+
         self.matrix.eliminate();
+
         Ok(())
     }
 
@@ -96,7 +97,8 @@ impl Balancer {
 
         for i in 0..(columns_count - 1) {
             let coefficient = least_common_multiple
-                / self.matrix.cells[i][i] * self.matrix.cells[i][columns_count - 1];
+                / self.matrix.cells[i][i]
+                * self.matrix.cells[i][columns_count - 1];
             coefficients.push(coefficient);
         }
 
@@ -138,18 +140,11 @@ impl Balancer {
 
     /// Balances an equation.
     pub fn balance_equation(&mut self) -> Result<String, BalancerError> {
-        if let Err(e) = self.solve_matrix() {
-            return Err(e);
-        }
+        self.solve_matrix()?;
 
-        let coefficients = match self.extract_coefficients() {
-            Ok(x) => x,
-            Err(e) => return Err(e),
-        };
+        let coefficients = self.extract_coefficients()?;
 
-        if let Err(e) = self.check_answer(&coefficients) {
-            return Err(e);
-        }
+        self.check_answer(&coefficients)?;
 
         Ok(self.equation.format(&coefficients))
     }

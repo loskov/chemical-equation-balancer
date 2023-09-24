@@ -1,3 +1,5 @@
+use regex::Regex;
+
 #[derive(Debug)]
 pub enum RegularExpression {
     Digits,
@@ -7,12 +9,18 @@ pub enum RegularExpression {
 }
 
 impl RegularExpression {
-    pub fn get_pattern(&self) -> &str {
-        match &self {
-            RegularExpression::Digits => r"^\d+",
-            RegularExpression::Spaces => r"^\s+",
-            RegularExpression::Symbol => r"^[A-Z][a-z]*",
-            RegularExpression::Token => r"^([A-Z][a-z]*|\d+|[e+-=(){}])",
+    /// Returns a pattern.
+    fn get_pattern(&self) -> &str {
+        match self {
+            Self::Digits => r"^\d+",
+            Self::Spaces => r"^\s+",
+            Self::Symbol => "^[A-Z][a-z]*",
+            Self::Token => r"^([A-Z][a-z]*|\d+|[e+-=(){}])",
         }
+    }
+
+    /// Returns the Regex instance.
+    pub fn get_regex(self) -> Regex {
+        Regex::new(self.get_pattern()).unwrap()
     }
 }

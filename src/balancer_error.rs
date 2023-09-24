@@ -7,13 +7,13 @@ pub enum BalancerError {
 }
 
 impl BalancerError {
-    pub fn get_description(&self) -> &'static str {
-        match &self {
-            BalancerError::AllZeroSolution => "Все коэффициенты равны нулю.",
-            BalancerError::IncorrectBalance => "Неверно расставлены коэффициенты.",
-            BalancerError::MismatchNumberOfCoefficients =>
-                "Несоответствие количества коэффициентов.",
-            BalancerError::MultipleIndependentSolutions =>
+    /// Returns the description.
+    pub fn get_description(&self) -> &str {
+        match self {
+            Self::AllZeroSolution => "Все коэффициенты равны нулю.",
+            Self::IncorrectBalance => "Неверно расставлены коэффициенты.",
+            Self::MismatchNumberOfCoefficients => "Несоответствие количества коэффициентов.",
+            Self::MultipleIndependentSolutions =>
                 "Реакцию можно уравнять бесконечным числом способов.",
         }
     }

@@ -11,16 +11,16 @@ pub struct Entity {
 
 impl Entity {
     /// Entity constructor.
-    pub fn new(items: Vec<Box<dyn Item>>, charge: i8) -> Entity {
+    pub fn new(items: Vec<Box<dyn Item>>, charge: i8) -> Self {
         debug_assert!(!items.is_empty() || charge == -1, "Invalid entity.");
 
-        Entity { items, charge }
+        Self { items, charge }
     }
 }
 
 impl Item for Entity {
     fn add_to_elements_names(&self, elements_names: &mut HashSet<String, RandomState>) {
-        elements_names.insert("e".to_string());
+        elements_names.insert("e".to_owned());
 
         for x in &self.items {
             x.add_to_elements_names(elements_names);
@@ -37,7 +37,7 @@ impl Item for Entity {
 
     fn format(&self) -> String {
         if self.items.is_empty() && self.charge == -1 {
-            return "e\u{2212}".to_string();
+            return "e\u{2212}".to_owned();
         }
 
         let mut result = String::new();
@@ -52,7 +52,7 @@ impl Item for Entity {
             if charge_without_sign != 1 {
                 result += &[
                     "{",
-                    charge_without_sign.to_string().as_str(),
+                    &charge_without_sign.to_string(),
                     if self.charge > 0 { "+" } else { "\u{2212}" },
                     "}",
                 ].join("");

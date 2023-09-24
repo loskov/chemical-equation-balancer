@@ -19,27 +19,27 @@ pub enum ParserError {
 }
 
 impl ParserError {
-    pub fn get_description(&self) -> &'static str {
-        match &self {
-            ParserError::AdvancingBeyondLastToken { .. } =>
-                "Продвижение за пределы последнего ключа.",
-            ParserError::ChargeOrChargeSignExpected { .. } => "Ожидается заряд или знак заряда.",
-            ParserError::ChargeSignExpected { .. } => "Ожидается знак заряда.",
-            ParserError::ClosingParenthesisAfterChargeExpected { .. } =>
+    /// Returns the description
+    pub fn get_description(&self) -> &str {
+        match self {
+            Self::AdvancingBeyondLastToken { .. } => "Продвижение за пределы последнего ключа.",
+            Self::ChargeOrChargeSignExpected { .. } => "Ожидается заряд или знак заряда.",
+            Self::ChargeSignExpected { .. } => "Ожидается знак заряда.",
+            Self::ClosingParenthesisAfterChargeExpected { .. } =>
                 "Ожидается закрывающая скобка после заряда.",
-            ParserError::ElectronNeedsToStandAlone { .. } => "Электрон должен стоять один.",
-            ParserError::ElementGroupOrClosingParenthesesIsExpected { .. } =>
+            Self::ElectronNeedsToStandAlone { .. } => "Электрон должен стоять один.",
+            Self::ElementGroupOrClosingParenthesesIsExpected { .. } =>
                 "Ожидается элемент, группа или закрывающая скобка.",
-            ParserError::ElementIsNotParsed => "Элемент не разобран.",
-            ParserError::EmptyGroup { .. } => "Пустая группа",
-            ParserError::EntityExpected { .. } => "Пропущено вещество.",
-            ParserError::InvalidChargeForElectron { .. } => "Неверный заряд электрона.",
-            ParserError::InvalidSymbol { .. } => "Неверный символ.",
-            ParserError::NumberNotExpected { .. } => "Число не ожидалось.",
-            ParserError::PlusOrEndExpected { .. } => "Ожидается плюс или завершение.",
-            ParserError::PlusOrEqualSignExpected { .. } => "Ожидается плюс или знак равенства.",
-            ParserError::TokenMismatch => "Ключ не совпадает со строкой.",
-            ParserError::TooBigNumber => "Слишком большое число.",
+            Self::ElementIsNotParsed => "Элемент не разобран.",
+            Self::EmptyGroup { .. } => "Пустая группа",
+            Self::EntityExpected { .. } => "Пропущено вещество.",
+            Self::InvalidChargeForElectron { .. } => "Неверный заряд электрона.",
+            Self::InvalidSymbol { .. } => "Неверный символ.",
+            Self::NumberNotExpected { .. } => "Число не ожидалось.",
+            Self::PlusOrEndExpected { .. } => "Ожидается плюс или завершение.",
+            Self::PlusOrEqualSignExpected { .. } => "Ожидается плюс или знак равенства.",
+            Self::TokenMismatch => "Ключ не совпадает со строкой.",
+            Self::TooBigNumber => "Слишком большое число.",
         }
     }
 }

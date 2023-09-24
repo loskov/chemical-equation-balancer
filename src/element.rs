@@ -11,22 +11,22 @@ pub struct Element {
 
 impl Element {
     /// Element constructor.
-    pub fn new(name: String, count: u8) -> Element {
-        Element { name, count }
+    pub fn new(name: String, count: u8) -> Self {
+        Self { name, count }
     }
 }
 
 impl Item for Element {
     fn add_to_elements_names(&self, elements_names: &mut HashSet<String, RandomState>) {
-        elements_names.insert(self.name.to_string());
+        elements_names.insert(self.name.clone());
     }
 
     fn count_element_by_name(&self, element_name: &str) -> u32 {
-        if self.name == element_name { self.count as u32 } else { 0 }
+        if self.name == element_name { u32::from(self.count) } else { 0 }
     }
 
     fn format(&self) -> String {
-        let mut result = self.name.to_string();
+        let mut result = self.name.clone();
 
         if self.count != 1 {
             result += &self.count.to_string();
@@ -56,8 +56,10 @@ mod tests {
         element.add_to_elements_names(&mut elements_names);
         result.insert("H".to_string());
         assert_eq!(elements_names, result);
+
         element.add_to_elements_names(&mut elements_names);
         assert_eq!(elements_names, result);
+
         let element = Element::new("O".to_string(), 1);
         element.add_to_elements_names(&mut elements_names);
         result.insert("O".to_string());

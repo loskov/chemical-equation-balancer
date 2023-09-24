@@ -14,17 +14,12 @@ use std::env;
 use crate::balancer::Balancer;
 
 fn main() {
-    let equation = match env::args().nth(1) {
-        Some(x) => x,
-        None => panic!("Нет уравнения."),
-    };
-    let mut balancer = match Balancer::new(&equation) {
-        Ok(x) => x,
-        Err(e) => panic!(e.get_description()),
-    };
-    let balanced_equation = match balancer.balance_equation() {
-        Ok(x) => x,
-        Err(e) => panic!(e.get_description()),
-    };
-    println!("{}", balanced_equation);
+    let equation = env::args().nth(1).expect("Нет уравнения.");
+    let mut balancer = Balancer::new(&equation)
+        .unwrap_or_else(|parser_error| panic!("{}", parser_error.get_description()));
+    let balanced_equation = balancer
+        .balance_equation()
+        .unwrap_or_else(|balancer_error| panic!("{}", balancer_error.get_description()));
+
+    println!("{balanced_equation}");
 }

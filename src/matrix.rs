@@ -11,8 +11,8 @@ pub struct Matrix {
 
 impl Matrix {
     /// Matrix constructor.
-    pub fn new(rows_count: usize, columns_count: usize) -> Matrix {
-        Matrix {
+    pub fn new(rows_count: usize, columns_count: usize) -> Self {
+        Self {
             cells: vec![vec![0; columns_count]; rows_count],
             rows_count,
             columns_count,
@@ -46,7 +46,7 @@ impl Matrix {
             return row.to_owned()
         }
 
-        let gcd_with_sign = sign * Matrix::get_gcd_of_row(&row);
+        let gcd_with_sign = sign * Self::get_gcd_of_row(row);
 
         row.iter().map(|&x| x / gcd_with_sign).collect()
     }
@@ -71,7 +71,7 @@ impl Matrix {
             let pivot = self.cells[pivot_row][i];
 
             if pivot_row != pivots_count {
-                self.cells.swap(pivots_count, pivot_row)
+                self.cells.swap(pivots_count, pivot_row);
             }
 
             pivots_count += 1;
@@ -123,7 +123,7 @@ mod tests {
                 result += ",\n";
             }
 
-            result += &["[", matrix.cells[i].iter().join(", ").as_str(), "]"].join("");
+            result += &["[", &matrix.cells[i].iter().join(", "), "]"].join("");
         }
 
         result + "]"

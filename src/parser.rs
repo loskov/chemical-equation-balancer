@@ -1,16 +1,16 @@
-use regex::Regex;
+use std::convert::TryFrom;
 use crate::{
     element::Element,
     entity::Entity,
     equation::Equation,
-    item::Item,
     group::Group,
+    item::Item,
     parser_error::ParserError,
     regular_expression::RegularExpression,
 };
 
-pub struct Parser<'a> {
-    equation: &'a str,
+pub struct Parser<'eq> {
+    equation: &'eq str,
     position: usize,
 }
 
@@ -31,9 +31,7 @@ impl Parser<'_> {
             return Ok(None);
         }
 
-        let regular_expression = Regex::new(RegularExpression::Token.get_pattern()).unwrap();
-
-        match regular_expression.captures(self.get_substring()) {
+        match RegularExpression::Token.get_regex().captures(self.get_substring()) {
             Some(x) => Ok(Some(x[0].to_string())),
             None => Err(ParserError::InvalidSymbol { start_index: self.position }),
         }
@@ -41,75 +39,45 @@ impl Parser<'_> {
 
     /// Takes a token.
     fn take_token(&mut self) -> Result<String, ParserError> {
-        let next_token = match self.get_next_token() {
-            Ok(x) => match x {
-                Some(x) => x,
-                None => return Err(ParserError::AdvancingBeyondLastToken),
-            },
-            Err(e) => return Err(e),
-        };
+        let next_token = self.get_next_token()?.ok_or(ParserError::AdvancingBeyondLastToken)?;
         self.position += next_token.chars().count();
         self.skip_spaces();
+
         Ok(next_token)
     }
 
     /// Consumes a string.
     fn consume(&mut self, string: &str) -> Result<(), ParserError> {
-        match self.take_token() {
-            Ok(x) => if x != string { Err(ParserError::TokenMismatch) } else { Ok(()) },
-            Err(e) => Err(e),
-        }
+        if self.take_token()? == string { Ok(()) } else { Err(ParserError::TokenMismatch) }
     }
 
     /// Skips the spaces.
     fn skip_spaces(&mut self) {
-        let regular_expression = Regex::new(RegularExpression::Spaces.get_pattern()).unwrap();
-
-        if let Some(x) = regular_expression.captures(self.get_substring()) {
+        if let Some(x) = RegularExpression::Spaces.get_regex().captures(self.get_substring()) {
             self.position += x[0].chars().count();
         }
     }
 
     /// Parses an optional number.
     fn parse_optional_number(&mut self) -> Result<u8, ParserError> {
-        match self.get_next_token() {
-            Ok(x) => match x {
-                Some(x) => {
-                    let regular_expression = Regex::new(
-                        RegularExpression::Digits.get_pattern()
-                    ).unwrap();
-
-                    if regular_expression.is_match(x.as_str()) {
-                        match self.take_token() {
-                            Ok(x) => match x.parse::<u8>() {
-                                Ok(x) => Ok(x),
-                                Err(_) => Err(ParserError::TooBigNumber),
-                            },
-                            Err(e ) => Err(e),
-                        }
-                    } else {
-                        Ok(1)
-                    }
-                },
-                None => Ok(1),
+        match self.get_next_token()? {
+            Some(x) => {
+                if RegularExpression::Digits.get_regex().is_match(&x) {
+                    self.take_token()?.parse::<u8>().map_err(|_e| ParserError::TooBigNumber)
+                } else {
+                    Ok(1)
+                }
             },
-            Err(e) => Err(e),
+            None => Ok(1),
         }
     }
 
     /// Parses an element.
     fn parse_element(&mut self) -> Result<Element, ParserError> {
-        let token = match self.take_token() {
-            Ok(x) => x,
-            Err(x) => return Err(x),
-        };
+        let token = self.take_token()?;
 
-        if Regex::new(RegularExpression::Symbol.get_pattern()).unwrap().is_match(&token) {
-            let optional_number = match self.parse_optional_number() {
-                Ok(x) => x,
-                Err(e) => return Err(e),
-            };
-            Ok(Element::new(token, optional_number))
+        if RegularExpression::Symbol.get_regex().is_match(&token) {
+            Ok(Element::new(token, self.parse_optional_number()?))
         } else {
             Err(ParserError::ElementIsNotParsed)
         }
@@ -120,39 +88,22 @@ impl Parser<'_> {
         let start_position = self.position;
         let mut items: Vec<Box<dyn Item>> = vec![];
 
-        if let Err(e) = self.consume("(") {
-            return Err(e);
-        }
+        self.consume("(")?;
 
-        let regular_expression = Regex::new(RegularExpression::Symbol.get_pattern()).unwrap();
+        let regex_for_symbol = RegularExpression::Symbol.get_regex();
 
         loop {
-            let next_token = match self.get_next_token() {
-                Ok(x) => match x {
-                    Some(x) => x,
-                    None => return Err(ParserError::ElementGroupOrClosingParenthesesIsExpected {
-                        start_index: self.position,
-                    }),
-                },
-                Err(e) => return Err(e),
-            };
+            let next_token = self.get_next_token()?
+                .ok_or(ParserError::ElementGroupOrClosingParenthesesIsExpected {
+                    start_index: self.position
+                })?;
 
             if next_token == "(" {
-                let group = match self.parse_group() {
-                    Ok(x) => x,
-                    Err(e) => return Err(e),
-                };
-                items.push(Box::new(group));
-            } else if regular_expression.is_match(&next_token) {
-                let element = match self.parse_element() {
-                    Ok(x) => x,
-                    Err(e) => return Err(e),
-                };
-                items.push(Box::new(element));
+                items.push(Box::new(self.parse_group()?));
+            } else if regex_for_symbol.is_match(&next_token) {
+                items.push(Box::new(self.parse_element()?));
             } else if next_token == ")" {
-                if let Err(e) = self.consume(&next_token) {
-                    return Err(e);
-                }
+                self.consume(&next_token)?;
 
                 if items.is_empty() {
                     return Err(ParserError::EmptyGroup {
@@ -168,11 +119,7 @@ impl Parser<'_> {
             }
         }
 
-        let optional_number = match self.parse_optional_number() {
-            Ok(x) => x,
-            Err(e) => return Err(e),
-        };
-        Ok(Group::new(items, optional_number))
+        Ok(Group::new(items, self.parse_optional_number()?))
     }
 
     /// Parses an entity.
@@ -180,41 +127,19 @@ impl Parser<'_> {
         let start_position = self.position;
         let mut items: Vec<Box<dyn Item>> = vec![];
         let mut is_electron = false;
-        let regular_expression_for_symbol = Regex::new(
-            RegularExpression::Symbol.get_pattern()
-        ).unwrap();
-        let regular_expression_for_digits = Regex::new(
-            RegularExpression::Digits.get_pattern()
-        ).unwrap();
+        let regex_for_symbol = RegularExpression::Symbol.get_regex();
+        let regex_for_digits = RegularExpression::Digits.get_regex();
 
-        loop {
-            let next_token = match self.get_next_token() {
-                Ok(x) => match x {
-                    Some(x) => x,
-                    None => break,
-                },
-                Err(e) => return Err(e),
-            };
-
-            if next_token == "(" {
-                let group = match self.parse_group() {
-                    Ok(x) => x,
-                    Err(e) => return Err(e),
-                };
-                items.push(Box::new(group));
-            } else if next_token == "e" {
-                if let Err(e) = self.consume(&next_token) {
-                    return Err(e);
-                }
+        while let Some(x) = self.get_next_token()? {
+            if x == "(" {
+                items.push(Box::new(self.parse_group()?));
+            } else if x == "e" {
+                self.consume(&x)?;
 
                 is_electron = true;
-            } else if regular_expression_for_symbol.is_match(&next_token) {
-                let element = match self.parse_element() {
-                    Ok(x) => x,
-                    Err(e) => return Err(e),
-                };
-                items.push(Box::new(element));
-            } else if regular_expression_for_digits.is_match(&next_token) {
+            } else if regex_for_symbol.is_match(&x) {
+                items.push(Box::new(self.parse_element()?));
+            } else if regex_for_digits.is_match(&x) {
                 return Err(ParserError::NumberNotExpected { start_index: self.position });
             } else {
                 break;
@@ -223,64 +148,36 @@ impl Parser<'_> {
 
         let mut charge: Option<i8> = None;
 
-        match self.get_next_token() {
-            Ok(x) => if let Some(x) = x {
-                if x == "{" {
-                    if let Err(e) = self.consume(&x) {
-                        return Err(e);
-                    }
+        if let Some(x) = self.get_next_token()? {
+            if x == "{" {
+                self.consume(&x)?;
 
-                    match self.get_next_token() {
-                        Ok(x) => match x {
-                            Some(_) => {},
-                            None => return Err(ParserError::ChargeOrChargeSignExpected {
-                                start_index: self.position,
-                            }),
-                        },
-                        Err(e) => return Err(e),
-                    }
+                self.get_next_token()?.ok_or(ParserError::ChargeOrChargeSignExpected {
+                    start_index: self.position,
+                })?;
 
-                    charge = match self.parse_optional_number() {
-                        Ok(x) => Some(x as i8),
-                        Err(e) => return Err(e),
-                    };
+                charge = Some(i8::try_from(self.parse_optional_number()?).unwrap());
 
-                    match self.get_next_token() {
-                        Ok(x) => if let Some(x) = x {
-                            if x == "-" {
-                                charge = Some(-charge.unwrap());
-                            } else if x != "+" {
-                                return Err(ParserError::ChargeSignExpected {
-                                    start_index: self.position,
-                                });
-                            }
-                        },
-                        Err(e) => return Err(e),
-                    }
-
-                    match self.take_token() {
-                        Ok(_) => {},
-                        Err(e) => return Err(e),
-                    }
-
-                    match self.get_next_token() {
-                        Ok(x) => if let Some(x) = x {
-                            if x == "}" {
-                                match self.consume(&x) {
-                                    Ok(_) => {},
-                                    Err(e) => return Err(e),
-                                };
-                            } else {
-                                return Err(ParserError::ClosingParenthesisAfterChargeExpected {
-                                    start_index: self.position,
-                                });
-                            }
-                        },
-                        Err(e) => return Err(e),
+                if let Some(x) = self.get_next_token()? {
+                    if x == "-" {
+                        charge = Some(-charge.unwrap());
+                    } else if x != "+" {
+                        return Err(ParserError::ChargeSignExpected { start_index: self.position });
                     }
                 }
-            },
-            Err(e) => return Err(e),
+
+                self.take_token()?;
+
+                if let Some(x) = self.get_next_token()? {
+                    if x == "}" {
+                        self.consume(&x)?;
+                    } else {
+                        return Err(ParserError::ClosingParenthesisAfterChargeExpected {
+                            start_index: self.position,
+                        });
+                    }
+                }
+            }
         }
 
         if is_electron {
@@ -302,8 +199,7 @@ impl Parser<'_> {
         } else {
             if items.is_empty() {
                 return Err(ParserError::EntityExpected {
-                    start_index: start_position,
-                    end_index: self.position,
+                    start_index: start_position, end_index: self.position,
                 });
             }
 
@@ -318,77 +214,42 @@ impl Parser<'_> {
     /// Parses an equation.
     pub fn parse_equation(&mut self) -> Result<Equation, ParserError> {
         self.skip_spaces();
+
         let mut reactants = vec![];
-        let entity = match self.parse_entity() {
-            Ok(x) => x,
-            Err(e) => return Err(e),
-        };
-        reactants.push(entity);
+        reactants.push(self.parse_entity()?);
 
         loop {
-            match self.get_next_token() {
-                Ok(x) => if let Some(x) = x {
-                    match x.as_str() {
-                        "+" => {
-                            if let Err(e) = self.consume(&x) {
-                                return Err(e);
-                            }
+            let next_token = self.get_next_token()?
+                .ok_or(ParserError::PlusOrEqualSignExpected { start_index: self.position })?;
 
-                            let entity = match self.parse_entity() {
-                                Ok(x) => x,
-                                Err(e) => return Err(e),
-                            };
-                            reactants.push(entity);
-                        },
-                        "=" => {
-                            if let Err(e) = self.consume(&x) {
-                                return Err(e);
-                            }
+            match next_token.as_str() {
+                "+" => {
+                    self.consume(&next_token)?;
 
-                            break;
-                        },
-                        _ => return Err(ParserError::PlusOrEqualSignExpected {
-                            start_index: self.position,
-                        }),
-                    }
-                } else {
-                    return Err(ParserError::PlusOrEqualSignExpected {
-                        start_index: self.position,
-                    });
+                    reactants.push(self.parse_entity()?);
                 },
-                Err(e) => return Err(e),
-            };
+                "=" => {
+                    self.consume(&next_token)?;
+
+                    break;
+                },
+                _ => return Err(ParserError::PlusOrEqualSignExpected {
+                    start_index: self.position,
+                }),
+            }
         }
 
         let mut products = vec![];
-        let entity = match self.parse_entity() {
-            Ok(x) => x,
-            Err(e) => return Err(e),
-        };
-        products.push(entity);
+        products.push(self.parse_entity()?);
 
-        loop {
-            match self.get_next_token() {
-                Ok(x) => match x {
-                    Some(x) => match x.as_str() {
-                        "+" => {
-                            if let Err(e) = self.consume(&x) {
-                                return Err(e)
-                            }
+        while let Some(x) = self.get_next_token()? {
+            match x.as_str() {
+                "+" => {
+                    self.consume(&x)?;
 
-                            let entity = match self.parse_entity() {
-                                Ok(x) => x,
-                                Err(e) => return Err(e),
-                            };
-                            products.push(entity);
-                        }
-                        _ => return Err(ParserError::PlusOrEndExpected {
-                            start_index: self.position,
-                        }),
-                    },
-                    None => break,
-                },
-                Err(e) => return Err(e),
+                    products.push(self.parse_entity()?);
+                }
+                _ => return Err(ParserError::PlusOrEndExpected { start_index: self.position }),
             }
         }
 
@@ -418,6 +279,7 @@ mod tests {
     fn test_get_next_token() {
         let mut parser = Parser::new("H2 + O2 = H2O");
         assert_eq!(parser.get_next_token().unwrap(), Some("H".to_string()));
+
         let _ = parser.consume("H");
         assert_eq!(parser.get_next_token().unwrap(), Some("2".to_string()));
     }

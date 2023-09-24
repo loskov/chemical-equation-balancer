@@ -10,8 +10,8 @@ pub struct Equation {
 
 impl Equation {
     /// Equation constructor.
-    pub fn new(reactants: Vec<Entity>, products: Vec<Entity>) -> Equation {
-        Equation { reactants, products }
+    pub fn new(reactants: Vec<Entity>, products: Vec<Entity>) -> Self {
+        Self { reactants, products }
     }
 
     /// Returns the names of elements.
@@ -30,7 +30,7 @@ impl Equation {
     }
 
     /// Formats the entities.
-    fn format_entities(&self, coefficients: &[i32], entities: &[Entity]) -> String {
+    fn format_entities(coefficients: &[i32], entities: &[Entity]) -> String {
         let mut result = String::new();
         let mut is_head = true;
 
@@ -45,7 +45,7 @@ impl Equation {
                 }
 
                 if coefficient != 1 {
-                    result += &[coefficient.to_string().as_str(), "\u{a0}"].join("");
+                    result += &[&coefficient.to_string(), "\u{a0}"].join("");
                 }
 
                 result += &entities[i].format();
@@ -58,9 +58,9 @@ impl Equation {
     /// Formats an equation.
     pub fn format(&self, coefficients: &[i32]) -> String {
         [
-            &self.format_entities(coefficients, &self.reactants),
-            " = ",
-            &self.format_entities(
+            Self::format_entities(coefficients, &self.reactants),
+            " = ".to_string(),
+            Self::format_entities(
                 &coefficients[self.reactants.len()..coefficients.len()],
                 &self.products
             ),
