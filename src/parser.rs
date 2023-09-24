@@ -48,7 +48,11 @@ impl Parser<'_> {
 
     /// Consumes a string.
     fn consume(&mut self, string: &str) -> Result<(), ParserError> {
-        if self.take_token()? == string { Ok(()) } else { Err(ParserError::TokenMismatch) }
+        if self.take_token()? == string {
+            Ok(())
+        } else {
+            Err(ParserError::TokenDoesNotMatchString)
+        }
     }
 
     /// Skips the spaces.
@@ -63,7 +67,7 @@ impl Parser<'_> {
         match self.get_next_token()? {
             Some(x) => {
                 if RegularExpression::Digits.get_regex().is_match(&x) {
-                    self.take_token()?.parse::<u8>().map_err(|_e| ParserError::TooBigNumber)
+                    self.take_token()?.parse::<u8>().map_err(|_e| ParserError::NumberIsTooLarge)
                 } else {
                     Ok(1)
                 }
@@ -94,7 +98,7 @@ impl Parser<'_> {
 
         loop {
             let next_token = self.get_next_token()?
-                .ok_or(ParserError::ElementGroupOrClosingParenthesesIsExpected {
+                .ok_or(ParserError::ElementGroupOrClosingBracketIsExpected {
                     start_index: self.position
                 })?;
 
@@ -106,16 +110,21 @@ impl Parser<'_> {
                 self.consume(&next_token)?;
 
                 if items.is_empty() {
-                    return Err(ParserError::EmptyGroup {
-                        start_index: start_position, end_index: self.position,
-                    });
+                    return Err(
+                        ParserError::EmptyGroup {
+                            start_index: start_position,
+                            end_index: self.position,
+                        }
+                    );
                 }
 
                 break;
             } else {
-                return Err(ParserError::ElementGroupOrClosingParenthesesIsExpected {
-                    start_index: self.position,
-                });
+                return Err(
+                    ParserError::ElementGroupOrClosingBracketIsExpected {
+                        start_index: self.position,
+                    }
+                );
             }
         }
 
@@ -140,7 +149,7 @@ impl Parser<'_> {
             } else if regex_for_symbol.is_match(&x) {
                 items.push(Box::new(self.parse_element()?));
             } else if regex_for_digits.is_match(&x) {
-                return Err(ParserError::NumberNotExpected { start_index: self.position });
+                return Err(ParserError::NumberIsNotExpected { start_index: self.position });
             } else {
                 break;
             }
@@ -152,9 +161,9 @@ impl Parser<'_> {
             if x == "{" {
                 self.consume(&x)?;
 
-                self.get_next_token()?.ok_or(ParserError::ChargeOrChargeSignExpected {
-                    start_index: self.position,
-                })?;
+                self.get_next_token()?.ok_or(
+                    ParserError::ChargeOrChargeSignIsExpected { start_index: self.position }
+                )?;
 
                 charge = Some(i8::try_from(self.parse_optional_number()?).unwrap());
 
@@ -162,7 +171,9 @@ impl Parser<'_> {
                     if x == "-" {
                         charge = Some(-charge.unwrap());
                     } else if x != "+" {
-                        return Err(ParserError::ChargeSignExpected { start_index: self.position });
+                        return Err(
+                            ParserError::ChargeSignIsExpected { start_index: self.position }
+                        );
                     }
                 }
 
@@ -172,9 +183,11 @@ impl Parser<'_> {
                     if x == "}" {
                         self.consume(&x)?;
                     } else {
-                        return Err(ParserError::ClosingParenthesisAfterChargeExpected {
-                            start_index: self.position,
-                        });
+                        return Err(
+                            ParserError::ClosingBracketAfterChargeIsExpected {
+                                start_index: self.position,
+                            }
+                        );
                     }
                 }
             }
@@ -182,9 +195,12 @@ impl Parser<'_> {
 
         if is_electron {
             if !items.is_empty() {
-                return Err(ParserError::ElectronNeedsToStandAlone {
-                    start_index: start_position, end_index: self.position,
-                });
+                return Err(
+                    ParserError::ElectronNeedsToStandAlone {
+                        start_index: start_position,
+                        end_index: self.position,
+                    }
+                );
             }
 
             if charge.is_none() {
@@ -192,15 +208,21 @@ impl Parser<'_> {
             }
 
             if charge != Some(-1) {
-                return Err(ParserError::InvalidChargeForElectron {
-                    start_index: start_position, end_index: self.position,
-                });
+                return Err(
+                    ParserError::InvalidChargeForElectron {
+                        start_index: start_position,
+                        end_index: self.position,
+                    }
+                );
             }
         } else {
             if items.is_empty() {
-                return Err(ParserError::EntityExpected {
-                    start_index: start_position, end_index: self.position,
-                });
+                return Err(
+                    ParserError::EntityIsExpected {
+                        start_index: start_position,
+                        end_index: self.position,
+                    }
+                );
             }
 
             if charge.is_none() {
@@ -220,7 +242,7 @@ impl Parser<'_> {
 
         loop {
             let next_token = self.get_next_token()?
-                .ok_or(ParserError::PlusOrEqualSignExpected { start_index: self.position })?;
+                .ok_or(ParserError::PlusSignOrEqualSignIsExpected { start_index: self.position })?;
 
             match next_token.as_str() {
                 "+" => {
@@ -233,9 +255,9 @@ impl Parser<'_> {
 
                     break;
                 },
-                _ => return Err(ParserError::PlusOrEqualSignExpected {
-                    start_index: self.position,
-                }),
+                _ => return Err(
+                    ParserError::PlusSignOrEqualSignIsExpected { start_index: self.position }
+                ),
             }
         }
 
@@ -249,7 +271,9 @@ impl Parser<'_> {
 
                     products.push(self.parse_entity()?);
                 }
-                _ => return Err(ParserError::PlusOrEndExpected { start_index: self.position }),
+                _ => return Err(
+                    ParserError::PlusSignOrEndIsExpected { start_index: self.position }
+                ),
             }
         }
 

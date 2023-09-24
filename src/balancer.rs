@@ -61,7 +61,7 @@ impl Balancer {
         }
 
         if row_index == self.matrix.rows_count - 1 {
-            return Err(BalancerError::AllZeroSolution);
+            return Err(BalancerError::AllCoefficientsAreZero);
         }
 
         self.matrix.cells[self.matrix.rows_count - 1][row_index] = 1;
@@ -84,7 +84,7 @@ impl Balancer {
 
         if rows_count < columns_count - 1
             || self.matrix.cells[columns_count - 2][columns_count - 2] == 0 {
-            return Err(BalancerError::MultipleIndependentSolutions);
+            return Err(BalancerError::ReactionCanBeEqualizedInInfiniteNumberOfWays);
         }
 
         let mut least_common_multiple = 1;
@@ -111,11 +111,11 @@ impl Balancer {
         let products = &self.equation.products;
 
         if reactants.len() + products.len() != coefficients.len() {
-            return Err(BalancerError::MismatchNumberOfCoefficients);
+            return Err(BalancerError::MismatchInNumberOfCoefficients);
         }
 
         if coefficients.iter().all(|&x| x == 0) {
-            return Err(BalancerError::AllZeroSolution);
+            return Err(BalancerError::AllCoefficientsAreZero);
         }
 
         let mut sum = 0;
@@ -131,7 +131,7 @@ impl Balancer {
             }
 
             if sum != 0 {
-                return Err(BalancerError::IncorrectBalance);
+                return Err(BalancerError::CoefficientsAreIncorrectlyPlaced);
             }
         }
 

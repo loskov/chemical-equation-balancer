@@ -14,7 +14,7 @@ use std::env;
 use crate::balancer::Balancer;
 
 fn main() {
-    let equation = env::args().nth(1).expect("Нет уравнения.");
+    let equation = env::args().nth(1).expect("No equation.");
     let mut balancer = Balancer::new(&equation)
         .unwrap_or_else(|parser_error| panic!("{}", parser_error.get_description()));
     let balanced_equation = balancer

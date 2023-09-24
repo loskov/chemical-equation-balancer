@@ -1,44 +1,44 @@
-# Chemical equation balancer
+# Chemical Equation Balancer
 
-## Принцип работы
+## Algorithm
 
-* Уравнение химической реакции разбирается методом рекурсивного спуска.
-* Создаётся система линейных алгебраических уравнений в матричной форме.
-* Матрица приводится к ступенчатому виду методом Гаусса — Жордана.
-* Рассчитанные коэффициенты извлекаются из преобразованной матрицы.
+1. The equation of a chemical reaction is parsed by recursive descent.
+2. The system of linear algebraic equations in matrix form is created.
+3. The reduced row echelon form of a matrix is computed.
+4. The calculated coefficients are extracted from the transformed matrix.
 
-## Инструкция
+## Rules
 
-* Реагенты и продукты химической реакции вводятся без коэффициентов.
-* Символы химических элементов начинаются с заглавной буквы.
-* Заряд иона указывается в фигурных скобках, знак идёт после числа: `{3+}`, `{2-}`.
-* Электрон записывается как `e` или `e{-}`.
+* The reactants and products of a chemical reaction must be entered without coefficients.
+* Every chemical symbol must begin with a capital letter.
+* The ion charge must be enclosed in curly brackets, the sign comes after the number: `{3+}`, `{2-}`.
+* An electron must be written as `e` or `e{-}`.
 
-## Примеры
+## Examples
 
-Молекулярные уравнения:
+Molecular equations:
 * `H2 + O2 = H2O`.
 * `Fe + H2SO4 = Fe2(SO4)3 + SO2 + H2O`.
 * `H2O + Pb(CH3COO)2 = CH3COOH + Pb(OH)2`.
 * `NaOH + Cl2 + Br2 = NaBrO3 + NaCl + H2O`.
 * `C6H12O6 + KMnO4 + H2SO4 = CO2 + K2SO4 + MnSO4 + H2O`.
 
-Ионные уравнения:
+Ionic equations:
 * `Fe{3+} + e = Fe`.
 * `Cl{5+} + e = Cl{-}`.
 * `CO3{2-} + H{+} = H2O + CO2`.
 * `CaCO3 + H{+} = Ca{2+} + CO2 + H2O`.
 * `Cr2O7{2-} + H{+} + e = Cr{3+} + H2O`.
 
-## Использование
+## Usage
 
 ```shell script
-# Скомпилировать и запустить, передав уравнение.
+# Compile and run by passing the equation.
 cargo run "H2 + O2 = H2O"
 
-# Скомпилировать релизную версию.
+# Compile the release version.
 cargo build --release
 
-# Запустить тесты.
+# Run the tests.
 cargo test
 ```

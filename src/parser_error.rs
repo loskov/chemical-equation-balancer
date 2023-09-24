@@ -1,45 +1,46 @@
 #[derive(Debug)]
 pub enum ParserError {
     AdvancingBeyondLastToken,
-    ChargeOrChargeSignExpected { start_index: usize },
-    ChargeSignExpected { start_index: usize },
-    ClosingParenthesisAfterChargeExpected { start_index: usize },
+    ChargeOrChargeSignIsExpected { start_index: usize },
+    ChargeSignIsExpected { start_index: usize },
+    ClosingBracketAfterChargeIsExpected { start_index: usize },
     ElectronNeedsToStandAlone { start_index: usize, end_index: usize },
-    ElementGroupOrClosingParenthesesIsExpected { start_index: usize },
+    ElementGroupOrClosingBracketIsExpected { start_index: usize },
     ElementIsNotParsed,
     EmptyGroup { start_index: usize, end_index: usize },
-    EntityExpected { start_index: usize, end_index: usize },
+    EntityIsExpected { start_index: usize, end_index: usize },
     InvalidChargeForElectron { start_index: usize, end_index: usize },
     InvalidSymbol { start_index: usize },
-    NumberNotExpected { start_index: usize },
-    PlusOrEndExpected { start_index: usize },
-    PlusOrEqualSignExpected { start_index: usize },
-    TokenMismatch,
-    TooBigNumber,
+    NumberIsNotExpected { start_index: usize },
+    NumberIsTooLarge,
+    PlusSignOrEndIsExpected { start_index: usize },
+    PlusSignOrEqualSignIsExpected { start_index: usize },
+    TokenDoesNotMatchString,
 }
 
 impl ParserError {
     /// Returns the description
     pub fn get_description(&self) -> &str {
         match self {
-            Self::AdvancingBeyondLastToken { .. } => "Продвижение за пределы последнего ключа.",
-            Self::ChargeOrChargeSignExpected { .. } => "Ожидается заряд или знак заряда.",
-            Self::ChargeSignExpected { .. } => "Ожидается знак заряда.",
-            Self::ClosingParenthesisAfterChargeExpected { .. } =>
-                "Ожидается закрывающая скобка после заряда.",
-            Self::ElectronNeedsToStandAlone { .. } => "Электрон должен стоять один.",
-            Self::ElementGroupOrClosingParenthesesIsExpected { .. } =>
-                "Ожидается элемент, группа или закрывающая скобка.",
-            Self::ElementIsNotParsed => "Элемент не разобран.",
-            Self::EmptyGroup { .. } => "Пустая группа",
-            Self::EntityExpected { .. } => "Пропущено вещество.",
-            Self::InvalidChargeForElectron { .. } => "Неверный заряд электрона.",
-            Self::InvalidSymbol { .. } => "Неверный символ.",
-            Self::NumberNotExpected { .. } => "Число не ожидалось.",
-            Self::PlusOrEndExpected { .. } => "Ожидается плюс или завершение.",
-            Self::PlusOrEqualSignExpected { .. } => "Ожидается плюс или знак равенства.",
-            Self::TokenMismatch => "Ключ не совпадает со строкой.",
-            Self::TooBigNumber => "Слишком большое число.",
+            Self::AdvancingBeyondLastToken { .. } => "Advancing beyond the last token.",
+            Self::ChargeOrChargeSignIsExpected { .. } => "The charge or charge sign is expected.",
+            Self::ChargeSignIsExpected { .. } => "The charge sign is expected.",
+            Self::ClosingBracketAfterChargeIsExpected { .. } =>
+                "The closing bracket after the charge is expected.",
+            Self::ElectronNeedsToStandAlone { .. } => "An electron needs to stand alone.",
+            Self::ElementGroupOrClosingBracketIsExpected { .. } =>
+                "The element, group, or closing bracket is expected.",
+            Self::ElementIsNotParsed => "The element is not parsed.",
+            Self::EmptyGroup { .. } => "Empty group.",
+            Self::EntityIsExpected { .. } => "The entity is expected.",
+            Self::InvalidChargeForElectron { .. } => "Invalid charge for an electron.",
+            Self::InvalidSymbol { .. } => "Invalid symbol.",
+            Self::NumberIsNotExpected { .. } => "The number is not expected.",
+            Self::NumberIsTooLarge => "The number is too large.",
+            Self::PlusSignOrEndIsExpected { .. } => "The plus sign or end is expected.",
+            Self::PlusSignOrEqualSignIsExpected { .. } =>
+                "The plus sign or equal sign is expected.",
+            Self::TokenDoesNotMatchString => "The token does not match the string.",
         }
     }
 }

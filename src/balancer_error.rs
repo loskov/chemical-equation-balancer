@@ -1,20 +1,20 @@
 #[derive(Debug)]
 pub enum BalancerError {
-    AllZeroSolution,
-    IncorrectBalance,
-    MismatchNumberOfCoefficients,
-    MultipleIndependentSolutions,
+    AllCoefficientsAreZero,
+    CoefficientsAreIncorrectlyPlaced,
+    MismatchInNumberOfCoefficients,
+    ReactionCanBeEqualizedInInfiniteNumberOfWays,
 }
 
 impl BalancerError {
     /// Returns the description.
     pub fn get_description(&self) -> &str {
         match self {
-            Self::AllZeroSolution => "Все коэффициенты равны нулю.",
-            Self::IncorrectBalance => "Неверно расставлены коэффициенты.",
-            Self::MismatchNumberOfCoefficients => "Несоответствие количества коэффициентов.",
-            Self::MultipleIndependentSolutions =>
-                "Реакцию можно уравнять бесконечным числом способов.",
+            Self::AllCoefficientsAreZero => "All coefficients are zero.",
+            Self::CoefficientsAreIncorrectlyPlaced => "The coefficients are incorrectly placed.",
+            Self::MismatchInNumberOfCoefficients => "Mismatch in the number of coefficients.",
+            Self::ReactionCanBeEqualizedInInfiniteNumberOfWays =>
+                "The reaction can be equalized in an infinite number of ways.",
         }
     }
 }
