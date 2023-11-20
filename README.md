@@ -2,10 +2,10 @@
 
 ## Algorithm
 
-1. The equation of a chemical reaction is parsed by recursive descent.
-2. The system of linear algebraic equations in matrix form is created.
-3. The reduced row echelon form of a matrix is computed.
-4. The calculated coefficients are extracted from the transformed matrix.
+1. Parse the equation of a chemical reaction using recursive descent.
+2. Create the system of linear algebraic equations in matrix form.
+3. Compute the reduced row echelon form of the matrix.
+4. Extract the calculated coefficients from the transformed matrix.
 
 ## Rules
 
